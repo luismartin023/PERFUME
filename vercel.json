@@ -1,0 +1,13 @@
+{
+  "buildCommand": null,
+  "outputDirectory": null,
+  "devCommand": null,
+  "installCommand": null,
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/tienda/$1"
+    }
+  ]
+}
