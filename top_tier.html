@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Battle Royale de Fragancias | AS Fragrance</title>
+    <meta name="description" content="La batalla definitiva de los mejores perfumes: Top 5 masculino, Top 5 femenino, Top 4 general y Top combos de AS Fragrance.">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #060814;
+            --gold: #FFD700;
+            --gold-light: #ffe566;
+            --pink: #ff2d78;
+            --purple: #7c3aed;
+            --cyan: #06d6a0;
+            --blue: #3a86ff;
+            --male-color: #3a86ff;
+            --female-color: #ff2d78;
+            --general-color: #FFD700;
+            --combo-color: #06d6a0;
+            --glass: rgba(255,255,255,0.04);
+            --glass-border: rgba(255,255,255,0.09);
+            --text: #f0f0f8;
+            --text-muted: #8890b5;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* ── BG ORBS ── */
+        .bg-orbs { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+        .orb { position:absolute; border-radius:50%; filter:blur(100px); opacity:0.22; animation:orbFloat 18s ease-in-out infinite alternate; }
+        .orb-1 { width:700px; height:700px; background:var(--purple); top:-200px; left:-200px; }
+        .orb-2 { width:600px; height:600px; background:var(--pink); bottom:-150px; right:-150px; animation-delay:-8s; animation-duration:14s; }
+        .orb-3 { width:400px; height:400px; background:var(--blue); top:50%; left:50%; transform:translateX(-50%); animation-delay:-4s; animation-duration:22s; }
+        .orb-4 { width:350px; height:350px; background:var(--cyan); top:15%; right:8%; animation-delay:-12s; animation-duration:16s; }
+        @keyframes orbFloat {
+            0% { transform: translate(0,0) scale(1); }
+            50% { transform: translate(30px,-50px) scale(1.08); }
+            100% { transform: translate(-25px,35px) scale(0.94); }
+        }
+
+        /* ── LOADER ── */
+        #loader {
+            position:fixed; inset:0; background:var(--bg-dark);
+            z-index:99999; display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            transition: opacity .6s ease, visibility .6s ease;
+        }
+        #loader.hidden { opacity:0; visibility:hidden; }
+        .loader-ring {
+            width:80px; height:80px; border-radius:50%;
+            border:3px solid transparent;
+            background: linear-gradient(#060814,#060814) padding-box,
+                        linear-gradient(135deg,var(--gold),var(--pink)) border-box;
+            display:flex; align-items:center; justify-content:center;
+            font-size:2.5rem; animation:spin 1.4s linear infinite; margin-bottom:1.2rem;
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .loader-text { font-size:1.3rem; font-weight:800; letter-spacing:4px;
+            background:linear-gradient(to right,var(--gold),var(--pink));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+        /* ── LAYOUT ── */
+        .page { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:0 1.5rem 6rem; }
+
+        /* ── TOP NAV ── */
+        .top-nav { display:flex; justify-content:center; padding:1.5rem 0; }
+        .back-btn {
+            display:inline-flex; align-items:center; gap:8px; padding:11px 26px;
+            background:var(--glass); border:1px solid var(--glass-border); border-radius:50px;
+            color:var(--text); text-decoration:none; font-weight:600; font-size:.9rem;
+            transition:all .3s ease; backdrop-filter:blur(14px);
+        }
+        .back-btn:hover { background:rgba(255,255,255,.09); border-color:var(--gold); color:var(--gold); transform:translateX(-4px); }
+
+        /* ── HERO ── */
+        .hero { text-align:center; padding:3.5rem 1rem 2.5rem; }
+        .hero-badge {
+            display:inline-block; padding:5px 18px; border-radius:50px;
+            background:linear-gradient(135deg,rgba(255,215,0,.14),rgba(255,45,120,.14));
+            border:1px solid rgba(255,215,0,.3); font-size:.75rem; font-weight:700;
+            letter-spacing:3px; color:var(--gold); text-transform:uppercase; margin-bottom:1.4rem;
+        }
+        .hero-title {
+            font-size:clamp(2.4rem,6vw,4.8rem); font-weight:900; line-height:1.1; margin-bottom:1.2rem;
+            background:linear-gradient(135deg,var(--gold),var(--pink),var(--purple));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+            animation:fireGlow 2.5s ease-in-out infinite alternate;
+        }
+        @keyframes fireGlow {
+            0% { filter:drop-shadow(0 0 8px rgba(255,215,0,.3)); }
+            100% { filter:drop-shadow(0 0 22px rgba(255,45,120,.5)); }
+        }
+        .hero-sub { font-size:clamp(.95rem,2.5vw,1.2rem); color:var(--text-muted); max-width:680px; margin:0 auto 2.2rem; line-height:1.7; }
+
+        /* ── NAV TABS ── */
+        .section-nav { display:flex; flex-wrap:wrap; justify-content:center; gap:.65rem; margin-bottom:3rem; }
+        .nav-tab {
+            padding:9px 20px; border-radius:50px; border:1px solid var(--glass-border);
+            background:var(--glass); color:var(--text-muted); font-weight:600; font-size:.85rem;
+            text-decoration:none; transition:all .3s ease; backdrop-filter:blur(10px);
+        }
+        .nav-tab:hover { background:rgba(255,255,255,.09); color:white; }
+        .nav-tab.male:hover { background:rgba(58,134,255,.18); color:var(--male-color); border-color:var(--male-color); box-shadow:0 0 16px rgba(58,134,255,.3); }
+        .nav-tab.female:hover { background:rgba(255,45,120,.18); color:var(--female-color); border-color:var(--female-color); box-shadow:0 0 16px rgba(255,45,120,.3); }
+        .nav-tab.general:hover { background:rgba(255,215,0,.12); color:var(--gold); border-color:var(--gold); box-shadow:0 0 16px rgba(255,215,0,.25); }
+        .nav-tab.combo:hover { background:rgba(6,214,160,.12); color:var(--combo-color); border-color:var(--combo-color); box-shadow:0 0 16px rgba(6,214,160,.25); }
+
+        /* ── STATS ── */
+        .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:1.1rem; margin-bottom:4rem; }
+        .stat-card {
+            background:var(--glass); border:1px solid var(--glass-border); border-radius:20px;
+            padding:1.8rem 1.3rem; text-align:center; backdrop-filter:blur(20px);
+            transition:all .3s ease; cursor:default;
+        }
+        .stat-card:hover { transform:translateY(-5px); }
+        .stat-card.men { border-color:rgba(58,134,255,.35); }
+        .stat-card.men:hover { box-shadow:0 12px 40px rgba(58,134,255,.18); }
+        .stat-card.women { border-color:rgba(255,45,120,.35); }
+        .stat-card.women:hover { box-shadow:0 12px 40px rgba(255,45,120,.18); }
+        .stat-card.combos { border-color:rgba(6,214,160,.35); }
+        .stat-card.combos:hover { box-shadow:0 12px 40px rgba(6,214,160,.18); }
+        .stat-card.total { border-color:rgba(255,215,0,.35); }
+        .stat-card.total:hover { box-shadow:0 12px 40px rgba(255,215,0,.18); }
+        .stat-icon { font-size:2.2rem; display:block; margin-bottom:.6rem; }
+        .stat-number { font-size:3.2rem; font-weight:900; display:block; line-height:1; margin-bottom:.4rem; }
+        .stat-card.men .stat-number { color:var(--male-color); }
+        .stat-card.women .stat-number { color:var(--female-color); }
+        .stat-card.combos .stat-number { color:var(--combo-color); }
+        .stat-card.total .stat-number { color:var(--gold); }
+        .stat-label { font-size:.82rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:2px; }
+
+        /* ── CRITERIA ── */
+        .criteria-box {
+            background:var(--glass); border:1px solid var(--glass-border); border-radius:22px;
+            padding:1.8rem 2rem; margin-bottom:4rem; backdrop-filter:blur(18px);
+        }
+        .criteria-title { font-size:1.1rem; font-weight:800; margin-bottom:1.3rem; color:white; }
+        .criteria-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:.9rem; }
+        .crit-item { display:flex; align-items:flex-start; gap:.7rem; padding:.9rem; background:rgba(255,255,255,.03); border-radius:12px; border:1px solid rgba(255,255,255,.05); }
+        .crit-em { font-size:1.4rem; flex-shrink:0; }
+        .crit-text strong { display:block; font-size:.85rem; font-weight:700; color:white; margin-bottom:.2rem; }
+        .crit-text span { font-size:.78rem; color:var(--text-muted); line-height:1.5; }
+        .crit-note { margin-top:1.2rem; font-size:.82rem; color:var(--text-muted); text-align:center; line-height:1.7; }
+
+        /* ── SECTION ── */
+        .section { margin-bottom:5rem; scroll-margin-top:70px; }
+        .sec-header { display:flex; align-items:center; gap:.9rem; margin-bottom:2rem; padding-bottom:1rem; position:relative; }
+        .sec-header::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; border-radius:2px; }
+        .sec-male .sec-header::after { background:linear-gradient(to right,var(--male-color),transparent); }
+        .sec-female .sec-header::after { background:linear-gradient(to right,var(--female-color),transparent); }
+        .sec-general .sec-header::after { background:linear-gradient(to right,var(--gold),transparent); }
+        .sec-combos .sec-header::after { background:linear-gradient(to right,var(--combo-color),transparent); }
+        .sec-icon { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.7rem; flex-shrink:0; }
+        .sec-male .sec-icon { background:rgba(58,134,255,.14); border:1px solid rgba(58,134,255,.3); }
+        .sec-female .sec-icon { background:rgba(255,45,120,.14); border:1px solid rgba(255,45,120,.3); }
+        .sec-general .sec-icon { background:rgba(255,215,0,.1); border:1px solid rgba(255,215,0,.28); }
+        .sec-combos .sec-icon { background:rgba(6,214,160,.1); border:1px solid rgba(6,214,160,.28); }
+        .sec-title { font-size:clamp(1.5rem,4vw,2.1rem); font-weight:900; line-height:1.2; margin-bottom:.2rem; }
+        .sec-male .sec-title { color:var(--male-color); }
+        .sec-female .sec-title { color:var(--female-color); }
+        .sec-general .sec-title { color:var(--gold); }
+        .sec-combos .sec-title { color:var(--combo-color); }
+        .sec-sub { font-size:.85rem; color:var(--text-muted); }
+
+        /* ── PRODUCT CARD (common) ── */
+        .prod-card {
+            background:var(--glass); border:1px solid var(--glass-border); border-radius:18px;
+            overflow:hidden; transition:all .35s ease; backdrop-filter:blur(20px);
+            display:flex; flex-direction:column;
+        }
+        .prod-card:hover { transform:translateY(-7px); }
+        .prod-img-wrap { position:relative; width:100%; padding-top:100%; overflow:hidden; flex-shrink:0; }
+        .prod-img-wrap img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .4s ease; }
+        .prod-card:hover .prod-img-wrap img { transform:scale(1.07); }
+        .prod-body { padding:1.1rem 1.2rem 1.3rem; flex:1; display:flex; flex-direction:column; gap:.5rem; }
+        .prod-rank-badge {
+            position:absolute; top:.7rem; left:.7rem; z-index:2;
+            width:38px; height:38px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            font-size:1rem; font-weight:900; color:#000;
+        }
+        .prod-rank-badge.gold-badge { background:linear-gradient(135deg,var(--gold),#f5c400); box-shadow:0 4px 14px rgba(255,215,0,.5); }
+        .prod-rank-badge.silver-badge { background:linear-gradient(135deg,#c0c0c0,#e8e8e8); }
+        .prod-rank-badge.bronze-badge { background:linear-gradient(135deg,#cd7f32,#e8a45a); }
+        .prod-rank-badge.num-badge { background:rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.2); color:white; font-size:.9rem; }
+        .prod-name { font-size:.92rem; font-weight:800; color:white; line-height:1.3; }
+        .prod-desc { font-size:.78rem; color:var(--text-muted); line-height:1.5; flex:1; }
+        .prod-footer { display:flex; align-items:center; justify-content:space-between; margin-top:.3rem; }
+        .prod-price { font-size:1.15rem; font-weight:900; }
+        .sec-male .prod-price { color:var(--male-color); }
+        .sec-female .prod-price { color:var(--female-color); }
+        .sec-general .prod-price { color:var(--gold); }
+        .prod-tag { padding:3px 10px; border-radius:20px; font-size:.68rem; font-weight:700; letter-spacing:.8px; text-transform:uppercase; }
+        .tag-male { background:rgba(58,134,255,.18); color:var(--male-color); border:1px solid rgba(58,134,255,.3); }
+        .tag-female { background:rgba(255,45,120,.18); color:var(--female-color); border:1px solid rgba(255,45,120,.3); }
+        .tag-unisex { background:rgba(255,215,0,.12); color:var(--gold); border:1px solid rgba(255,215,0,.28); }
+        .tag-beast { background:rgba(255,100,0,.18); color:#ff8c00; border:1px solid rgba(255,100,0,.3); }
+
+        /* ── PODIUM GRID (TOP 3) ── */
+        .podium-grid { display:grid; grid-template-columns:1fr 1.08fr 1fr; gap:1rem; margin-bottom:1.2rem; align-items:end; }
+        .podium-grid .prod-card { position:relative; }
+        /* medal stripe top */
+        .prod-card.medal-gold { border-color:rgba(255,215,0,.5); box-shadow:0 0 30px rgba(255,215,0,.12); }
+        .prod-card.medal-gold::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(to right,var(--gold),var(--gold-light)); z-index:1; }
+        .prod-card.medal-silver { border-color:rgba(200,200,220,.4); }
+        .prod-card.medal-silver::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(to right,#c0c0c0,#e8e8e8); z-index:1; }
+        .prod-card.medal-bronze { border-color:rgba(205,127,50,.4); }
+        .prod-card.medal-bronze::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(to right,#cd7f32,#e8a45a); z-index:1; }
+        .prod-card.medal-gold:hover { box-shadow:0 20px 50px rgba(255,215,0,.22); }
+
+        /* ── RANK ROWS (#4, #5) ── */
+        .rank-rows { display:flex; flex-direction:column; gap:.9rem; }
+        .rank-row {
+            display:flex; align-items:center; gap:1.1rem;
+            background:var(--glass); border:1px solid var(--glass-border); border-radius:16px;
+            overflow:hidden; transition:all .3s ease; backdrop-filter:blur(18px);
+        }
+        .rank-row:hover { border-color:rgba(255,255,255,.15); background:rgba(255,255,255,.06); transform:translateX(5px); }
+        .rank-row-img { width:90px; height:90px; flex-shrink:0; object-fit:cover; }
+        .rank-row-num { font-size:1.8rem; font-weight:900; color:var(--text-muted); min-width:44px; text-align:center; flex-shrink:0; }
+        .rank-row-body { flex:1; padding:.2rem 0; }
+        .rank-row-name { font-size:.95rem; font-weight:800; color:white; margin-bottom:.25rem; }
+        .rank-row-desc { font-size:.78rem; color:var(--text-muted); line-height:1.5; }
+        .rank-row-price { font-size:1.1rem; font-weight:900; padding-right:1.2rem; flex-shrink:0; }
+        .sec-male .rank-row-price { color:var(--male-color); }
+        .sec-female .rank-row-price { color:var(--female-color); }
+
+        /* ── GENERAL SECTION ── */
+        .general-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+        .general-grid .prod-card { position:relative; }
+        .prod-card.general-1 { border-color:rgba(255,215,0,.5); box-shadow:0 0 30px rgba(255,215,0,.12); }
+        .prod-card.general-1::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(to right,var(--gold),var(--gold-light)); z-index:1; }
+        .prod-card.general-1:hover { box-shadow:0 20px 50px rgba(255,215,0,.22); }
+        .prod-card.general-2 { border-color:rgba(200,200,220,.35); }
+        .prod-card.general-2::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(to right,#c0c0c0,#e8e8e8); z-index:1; }
+        .sec-general .rank-row-price { color:var(--gold); }
+
+        /* ── COMBOS ── */
+        .combo-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:1.1rem; }
+        .combo-card {
+            background:var(--glass); border:1px solid rgba(6,214,160,.2); border-radius:20px;
+            overflow:hidden; transition:all .35s ease; backdrop-filter:blur(20px);
+            display:flex; flex-direction:column; position:relative;
+        }
+        .combo-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(to right,var(--combo-color),transparent); }
+        .combo-card:hover { border-color:rgba(6,214,160,.45); transform:translateY(-6px); box-shadow:0 16px 50px rgba(6,214,160,.1); }
+        .combo-img { width:100%; height:180px; object-fit:cover; }
+        .combo-body { padding:1.2rem 1.4rem 1.4rem; flex:1; display:flex; flex-direction:column; gap:.55rem; }
+        .combo-rank-num {
+            position:absolute; top:.8rem; left:.8rem; z-index:2;
+            width:36px; height:36px; border-radius:50%;
+            background:linear-gradient(135deg,var(--combo-color),#04a77a);
+            display:flex; align-items:center; justify-content:center;
+            font-size:.9rem; font-weight:900; color:#060814;
+        }
+        .combo-tier { display:inline-block; padding:3px 10px; border-radius:20px; background:rgba(6,214,160,.1); border:1px solid rgba(6,214,160,.3); color:var(--combo-color); font-size:.68rem; font-weight:700; letter-spacing:.8px; text-transform:uppercase; }
+        .combo-name { font-size:.98rem; font-weight:800; color:white; line-height:1.3; padding-right:2.5rem; }
+        .combo-products { display:flex; flex-wrap:wrap; gap:.35rem; }
+        .combo-prod-tag { padding:2px 8px; border-radius:20px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); font-size:.7rem; color:var(--text-muted); }
+        .combo-desc { font-size:.8rem; color:var(--text-muted); line-height:1.6; flex:1; }
+        .combo-footer { display:flex; align-items:center; justify-content:space-between; margin-top:.4rem; }
+        .combo-price { font-size:1.2rem; font-weight:900; color:var(--combo-color); }
+        .combo-verdict { padding:.6rem .9rem; background:rgba(6,214,160,.07); border-radius:10px; border-left:3px solid var(--combo-color); font-size:.78rem; color:var(--text); line-height:1.55; }
+
+        /* ── DIVIDER ── */
+        .divider { height:1px; background:linear-gradient(to right,transparent,var(--glass-border),transparent); margin:4rem 0; }
+
+        /* ── VERDICT ── */
+        .verdict { background:linear-gradient(135deg,rgba(255,215,0,.06),rgba(255,45,120,.06)); border:1px solid rgba(255,215,0,.2); border-radius:20px; padding:2rem 2.2rem; margin-top:3rem; text-align:center; }
+        .verdict h3 { font-size:1.3rem; font-weight:800; color:var(--gold); margin-bottom:.9rem; }
+        .verdict p { font-size:.95rem; color:var(--text-muted); line-height:1.75; max-width:800px; margin:0 auto; }
+
+        /* ── SCROLL TOP ── */
+        .scroll-top { position:fixed; bottom:1.8rem; right:1.8rem; width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--pink)); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.3rem; box-shadow:0 6px 22px rgba(255,45,120,.4); transition:all .3s ease; z-index:100; opacity:0; transform:translateY(18px); }
+        .scroll-top.visible { opacity:1; transform:translateY(0); }
+        .scroll-top:hover { transform:translateY(-4px) scale(1.1); }
+
+        /* ── REVEAL ── */
+        .reveal { opacity:0; transform:translateY(28px); transition:opacity .6s ease, transform .6s ease; }
+        .reveal.visible { opacity:1; transform:translateY(0); }
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:760px) {
+            .podium-grid { grid-template-columns:1fr; }
+            .general-grid { grid-template-columns:1fr; }
+            .combo-grid { grid-template-columns:1fr; }
+            .criteria-grid { grid-template-columns:1fr; }
+            .rank-row-img { width:75px; height:75px; }
+            .page { padding:0 1rem 4rem; }
+        }
+        @media(max-width:480px) {
+            .stats-grid { grid-template-columns:repeat(2,1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="loader">
+    <div class="loader-ring">🏆</div>
+    <div class="loader-text">BATTLE ROYALE</div>
+    <p style="color:var(--text-muted);font-size:.8rem;margin-top:.5rem;letter-spacing:2px;">AS FRAGRANCE</p>
+</div>
+
+<div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+</div>
+
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="page">
+
+    <!-- NAV -->
+    <nav class="top-nav">
+        <a href="versus.html" class="back-btn" style="border-color: #ff0055; color: #fff; background: rgba(255,0,85,0.2); box-shadow: 0 0 15px rgba(255,0,85,0.5);">🔥 Ir al BATTLE ROYALE Arcade 👾</a>
+        <a href="tienda/top_tier.html" class="back-btn" style="border-color: #10935C; color: #fff; background: rgba(16,147,92,0.2); box-shadow: 0 0 15px rgba(16,147,92,0.5);">🏆 Versión Original</a>
+    </nav>
+
+    <!-- HERO -->
+    <header class="hero">
+        <div class="hero-badge">⚔️ Edición Especial 2025</div>
+        <h1 class="hero-title">🏆 Battle Royale<br>de Fragancias</h1>
+        <p class="hero-sub">
+            Analizamos los <strong style="color:white;">132 productos</strong> del catálogo de AS Fragrance con criterios de experto.
+            Solo los más letales en dulzor, duración, proyección y poder de atracción han sobrevivido. Con precios reales.
+        </p>
+        <nav class="section-nav">
+            <a href="#estadisticas" class="nav-tab">📊 Catálogo</a>
+            <a href="#criterios" class="nav-tab">📖 Criterios</a>
+            <a href="#masculinos" class="nav-tab male">💙 Top 5 Hombre</a>
+            <a href="#femeninos" class="nav-tab female">💗 Top 5 Mujer</a>
+            <a href="#general" class="nav-tab general">👑 Top 4 General</a>
+            <a href="#combos" class="nav-tab combo">🎁 Combos</a>
+        </nav>
+    </header>
+
+    <!-- ══ ESTADÍSTICAS ══ -->
+    <section id="estadisticas" class="section reveal">
+        <div class="stats-grid">
+            <div class="stat-card men">
+                <span class="stat-icon">💙</span>
+                <span class="stat-number">36</span>
+                <span class="stat-label">Perfumes de Hombre</span>
+            </div>
+            <div class="stat-card women">
+                <span class="stat-icon">💗</span>
+                <span class="stat-number">82</span>
+                <span class="stat-label">Perfumes de Mujer</span>
+            </div>
+            <div class="stat-card combos">
+                <span class="stat-icon">🎁</span>
+                <span class="stat-number">14</span>
+                <span class="stat-label">Combos y Sets</span>
+            </div>
+            <div class="stat-card total">
+                <span class="stat-icon">✨</span>
+                <span class="stat-number">132</span>
+                <span class="stat-label">Total en Catálogo</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ CRITERIOS ══ -->
+    <section id="criterios" class="section reveal">
+        <div class="criteria-box">
+            <div class="criteria-title">📖 Los Criterios del Battle Royale</div>
+            <div class="criteria-grid">
+                <div class="crit-item"><span class="crit-em">🍬</span><div class="crit-text"><strong>Dulzor Gourmand</strong><span>Acaramelados, vainillados, frutales — los que hacen que todos pregunten "¿a qué hueles?"</span></div></div>
+                <div class="crit-item"><span class="crit-em">⏳</span><div class="crit-text"><strong>Longevidad Beast Mode</strong><span>8h+ en piel. Los campeones duran hasta el día siguiente en ropa.</span></div></div>
+                <div class="crit-item"><span class="crit-em">💥</span><div class="crit-text"><strong>Proyección Asesina</strong><span>Inundan una habitación completa al instante. El radio de percepción es enorme.</span></div></div>
+                <div class="crit-item"><span class="crit-em">😍</span><div class="crit-text"><strong>Poder de Atracción</strong><span>Validado por 100k+ reseñas. Cumplidos garantizados, miradas giradas.</span></div></div>
+            </div>
+            <p class="crit-note"><strong style="color:var(--gold);">Nota:</strong> Lattafa, Afnan, Al Haramain y Armaf son casas árabes que crean versiones beast mode de fragancias de diseñador — en muchos casos superan al original en duración y proyección a menor precio.</p>
+        </div>
+    </section>
+
+    <!-- ══ TOP 5 MASCULINO ══ -->
+    <section id="masculinos" class="section sec-male reveal">
+        <div class="sec-header">
+            <div class="sec-icon">💙</div>
+            <div>
+                <h2 class="sec-title">Top 5 Masculino</h2>
+                <p class="sec-sub">Los 5 perfumes de hombre más bestias del catálogo</p>
+            </div>
+        </div>
+
+        <div class="podium-grid">
+            <!-- #2 -->
+            <div class="prod-card medal-silver">
+                <div class="prod-img-wrap">
+                    <img src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Fdec86231-1cbd-51e4-aa3f-86d1b03fae51.png" alt="Paco Rabanne 1 Million Royal" loading="lazy">
+                    <div class="prod-rank-badge silver-badge">#2</div>
+                </div>
+                <div class="prod-body">
+                    <div class="prod-name">PACO RABANNE 1 MILLION ROYAL PARFUM 3.4OZ</div>
+                    <div class="prod-desc">Cardamomo ahumado, benjuí y piel. Vibrante, ambicioso e increíblemente atrayente. El favorito de la noche que no se apaga.</div>
+                    <div class="prod-footer">
+                        <span class="prod-price">$6,495</span>
+                        <span class="prod-tag tag-male">🔥 Beast 9h+</span>
+                    </div>
+                </div>
+            </div>
+            <!-- #1 CENTRO -->
+            <div class="prod-card medal-gold">
+                <div class="prod-img-wrap">
+                    <img src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F24403f2b-7ddd-5c44-b457-f06893e9ea61.png" alt="JPG Le Male Elixir" loading="lazy">
+                    <div class="prod-rank-badge gold-badge">👑</div>
+                </div>
+                <div class="prod-body">
+                    <div class="prod-name">JEAN PAUL GAULTIER LE MALE ELIXIR 4.2OZ</div>
+                    <div class="prod-desc">Miel espesa, lavanda, haba tonka y tabaco dulce. La máxima autoridad del dulzor masculino moderno. Grita seducción desde que entras a la habitación.</div>
+                    <div class="prod-footer">
+                        <span class="prod-price">$8,595</span>
+                        <span class="prod-tag tag-beast">💥 Campeón</span>
+                    </div>
+                </div>
+            </div>
+            <!-- #3 -->
+            <div class="prod-card medal-bronze">
+                <div class="prod-img-wrap">
+                    <img src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Fcbfb6e86-0f80-5d00-a0c4-5e45819f6719.png" alt="Azzaro The Most Wanted" loading="lazy">
+                    <div class="prod-rank-badge bronze-badge">#3</div>
+                </div>
+                <div class="prod-body">
+                    <div class="prod-name">AZZARO THE MOST WANTED PARFUM 3.4OZ</div>
+                    <div class="prod-desc">Toffee de almendra, jengibre y bourbon. Profundo, especiado y un imán de cumplidos nocturno. Irresistible en otoño e invierno.</div>
+                    <div class="prod-footer">
+                        <span class="prod-price">$5,995</span>
+                        <span class="prod-tag tag-male">😍 Imán</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rank-rows">
+            <div class="rank-row">
+                <img class="rank-row-img" src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Fd23b1eba-4851-5f55-ad2c-713e43c14545.png" alt="Afnan 9PM" loading="lazy">
+                <div class="rank-row-num">#4</div>
+                <div class="rank-row-body">
+                    <div class="rank-row-name">AFNAN 9PM EDP 3.4OZ</div>
+                    <div class="rank-row-desc">Vainilla caramelizada, manzana dulce y cedro. Rey relación calidad-precio. Proyección asombrosa, inspirado en 1 Million con más dulzura y duración.</div>
+                </div>
+                <div class="rank-row-price">$2,890</div>
+            </div>
+            <div class="rank-row">
+                <img class="rank-row-img" src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F85aef7a9-974d-59d6-a05f-52bd2592a718.png" alt="Lattafa Asad Elixir" loading="lazy">
+                <div class="rank-row-num">#5</div>
+                <div class="rank-row-body">
+                    <div class="rank-row-name">LATTAFA ASAD ELIXIR 3.4OZ</div>
+                    <div class="rank-row-desc">Dulzura oriental con sándalo, oud y ambergris. Proyecta de manera asombrosa, llena cualquier espacio. Perfecto para ocasiones donde quieres dejar huella.</div>
+                </div>
+                <div class="rank-row-price">$3,490</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ══ TOP 5 FEMENINO ══ -->
+    <section id="femeninos" class="section sec-female reveal">
+        <div class="sec-header">
+            <div class="sec-icon">💗</div>
+            <div>
+                <h2 class="sec-title">Top 5 Femenino</h2>
+                <p class="sec-sub">Las 5 fragancias que hacen girar cabezas y enamoran</p>
+            </div>
+        </div>
+
+        <div class="podium-grid">
+            <!-- #2 -->
+            <div class="prod-card medal-silver">
+                <div class="prod-img-wrap">
+                    <img src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F3c1d4293-621d-5e76-a74a-da4aea72004c.png" alt="JPG Scandal" loading="lazy">
+                    <div class="prod-rank-badge silver-badge">#2</div>
+                </div>
+                <div class="prod-body">
+                    <div class="prod-name">JEAN PAUL GAULTIER SCANDAL WOMAN 2.7OZ</div>
+                    <div class="prod-desc">Miel oscura, pachulí y frambuesa. Diseñado para hacerse notar. Dulzor narcótico que se impone en cada sala que pisas.</div>
+                    <div class="prod-footer">
+                        <span class="prod-price">$6,495</span>
+                        <span class="prod-tag tag-female">🍯 Narcótico</span>
+                    </div>
+                </div>
+            </div>
+            <!-- #1 CENTRO -->
+            <div class="prod-card medal-gold">
+                <div class="prod-img-wrap">
+                    <img src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Ff570a5f9-ede7-57b4-987a-c27f03ddacfa.png" alt="Lattafa Eclaire" loading="lazy">
+                    <div class="prod-rank-badge gold-badge">👑</div>
+                </div>
+                <div class="prod-body">
+                    <div class="prod-name">LATTAFA ECLAIRE WOMEN 3.4 OZ</div>
+                    <div class="prod-desc">Leche cremosa, caramelo puro, vainilla y musk suave. Longevidad absurda: 12h+ en ropa. Inunda el edificio entero. La reina indiscutible del caramelo.</div>
+                    <div class="prod-footer">
+                        <span class="prod-price">$3,490</span>
+                        <span class="prod-tag tag-beast">💥 Campeona</span>
+                    </div>
+                </div>
+            </div>
+            <!-- #3 -->
+            <div class="prod-card medal-bronze">
+                <div class="prod-img-wrap">
+                    <img src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F413596ec-ef54-5d73-962b-3ed6f4c8e9bb.png" alt="Al Haramain Amber Oud Gold" loading="lazy">
+                    <div class="prod-rank-badge bronze-badge">#3</div>
+                </div>
+                <div class="prod-body">
+                    <div class="prod-name">AL HARAMAIN AMBER OUD GOLD EDITION 2.0OZ</div>
+                    <div class="prod-desc">Melón dulce, piña tropical y azúcar vainillada. Inspira en Erba Pura. Jovial, sexy y con rendimiento nuclear. Te persigue el olor hasta el día siguiente.</div>
+                    <div class="prod-footer">
+                        <span class="prod-price">$3,790</span>
+                        <span class="prod-tag tag-female">🌟 Nuclear</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rank-rows">
+            <div class="rank-row">
+                <img class="rank-row-img" src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F4134fc78-bc68-54be-bafe-cbdc09c3f327.png" alt="Carolina Herrera Good Girl" loading="lazy">
+                <div class="rank-row-num">#4</div>
+                <div class="rank-row-body">
+                    <div class="rank-row-name">CAROLINA HERRERA GOOD GIRL NEW YORK 2.7OZ EDP</div>
+                    <div class="rank-row-desc">Almendra tostada, café, jazmín y tonka. El ADN del icónico tacón negro. Extremadamente sensual, oscuro y femenino.</div>
+                </div>
+                <div class="rank-row-price">$7,795</div>
+            </div>
+            <div class="rank-row">
+                <img class="rank-row-img" src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F7f59649e-2b60-5ec8-9fb5-1d59223dcb88.png" alt="Ariana Grande Cloud" loading="lazy">
+                <div class="rank-row-num">#5</div>
+                <div class="rank-row-body">
+                    <div class="rank-row-name">ARIANA GRANDE CLOUD EDP 3.4OZ</div>
+                    <div class="rank-row-desc">Crema batida, coco y vainilla suave. Engañosamente suave pero increíblemente persistente. Uno de los más virales en redes por sus cumplidos.</div>
+                </div>
+                <div class="rank-row-price">$4,995</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ══ TOP 4 GENERAL ══ -->
+    <section id="general" class="section sec-general reveal">
+        <div class="sec-header">
+            <div class="sec-icon">👑</div>
+            <div>
+                <h2 class="sec-title">Top 4 General Absoluto</h2>
+                <p class="sec-sub">Los 4 sobrevivientes del Battle Royale total — sin género, sin piedad</p>
+            </div>
+        </div>
+
+        <div class="general-grid">
+            <div class="prod-card general-1">
+                <div class="prod-img-wrap">
+                    <img src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Ff570a5f9-ede7-57b4-987a-c27f03ddacfa.png" alt="Lattafa Eclaire" loading="lazy">
+                    <div class="prod-rank-badge gold-badge">👑</div>
+                </div>
+                <div class="prod-body">
+                    <div class="prod-name">LATTAFA ECLAIRE WOMEN 3.4 OZ</div>
+                    <div class="prod-desc">El monstruo de caramelo. Unisex en el sentido que conquista todo género y toda edad. Más cumplidos por aplicación que cualquier otro del catálogo. Longevidad de 12h+.</div>
+                    <div class="prod-footer">
+                        <span class="prod-price" style="color:var(--gold);">$3,490</span>
+                        <span class="prod-tag tag-unisex">🏆 #1 Absoluto</span>
+                    </div>
+                </div>
+            </div>
+            <div class="prod-card general-2">
+                <div class="prod-img-wrap">
+                    <img src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F24403f2b-7ddd-5c44-b457-f06893e9ea61.png" alt="JPG Le Male Elixir" loading="lazy">
+                    <div class="prod-rank-badge silver-badge">#2</div>
+                </div>
+                <div class="prod-body">
+                    <div class="prod-name">JEAN PAUL GAULTIER LE MALE ELIXIR 4.2OZ</div>
+                    <div class="prod-desc">Seducción magnética total. Miel, tonka y lavanda en armonía perfecta. La fragancia masculina más potente del catálogo, con poder de atracción sin igual.</div>
+                    <div class="prod-footer">
+                        <span class="prod-price" style="color:var(--gold);">$8,595</span>
+                        <span class="prod-tag tag-male">⚡ Poder Max</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rank-rows">
+            <div class="rank-row">
+                <img class="rank-row-img" src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Fc0c22cb5-7414-5301-adb3-4df50b9c9aa7.png" alt="Lattafa Khamrah Qahwa" loading="lazy">
+                <div class="rank-row-num" style="color:var(--gold);">#3</div>
+                <div class="rank-row-body">
+                    <div class="rank-row-name">LATTAFA KHAMRAH QAHWA 3.4OZ</div>
+                    <div class="rank-row-desc">Rey de la panadería árabe: dátiles dulces, praliné, canela y café tostado. Beast mode indiscutible. Ocupa una habitación entera durante horas. Hueles a un postre irresistible.</div>
+                </div>
+                <div class="rank-row-price" style="color:var(--gold);">$2,990</div>
+            </div>
+            <div class="rank-row">
+                <img class="rank-row-img" src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F413596ec-ef54-5d73-962b-3ed6f4c8e9bb.png" alt="Al Haramain Amber Oud Gold" loading="lazy">
+                <div class="rank-row-num" style="color:var(--gold);">#4</div>
+                <div class="rank-row-body">
+                    <div class="rank-row-name">AL HARAMAIN AMBER OUD GOLD EDITION 2.0OZ</div>
+                    <div class="rank-row-desc">El sultán frutal. Fusión radiactiva de melón dulce, piña y azúcar vainillada. Inspira en Erba Pura de Xerjoff. Genera más cumplidos que el 95% del catálogo.</div>
+                </div>
+                <div class="rank-row-price" style="color:var(--gold);">$3,790</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ══ TOP COMBOS ══ -->
+    <section id="combos" class="section sec-combos reveal">
+        <div class="sec-header">
+            <div class="sec-icon">🎁</div>
+            <div>
+                <h2 class="sec-title">Top Tier: Combos y Sets</h2>
+                <p class="sec-sub">Los mejores packs donde el combo supera la suma de sus partes</p>
+            </div>
+        </div>
+
+        <div class="combo-grid">
+
+            <!-- COMBO #1 -->
+            <div class="combo-card">
+                <div class="combo-rank-num">#1</div>
+                <img class="combo-img" src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F0590348c-d28d-59b5-85ae-62c1c7bb0cd7.png" alt="Set Yara 5th Anniversary" loading="lazy">
+                <div class="combo-body">
+                    <span class="combo-tier">👑 S-TIER</span>
+                    <div class="combo-name">LATTAFA SET YARA 5TH ANNIVERSARY: YARA + YARA CANDY</div>
+                    <div class="combo-products">
+                        <span class="combo-prod-tag">Yara EDP 3.4oz</span>
+                        <span class="combo-prod-tag">Yara Candy EDP 3.4oz</span>
+                    </div>
+                    <div class="combo-desc">Los dos perfumes femeninos más virales en TikTok. Yara (batido de fresa tropical) + Yara Candy (frutos acaramelados). En capas (layering) crean el gourmand más adictivo del catálogo.</div>
+                    <div class="combo-verdict">💡 El dúo más vendido. Combinados crean un aroma personalizado, único e irresistible.</div>
+                    <div class="combo-footer">
+                        <span class="combo-price">$3,990</span>
+                        <span class="prod-tag tag-female">2 perfumes</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMBO #2 -->
+            <div class="combo-card">
+                <div class="combo-rank-num">#2</div>
+                <img class="combo-img" src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F6800263a-308b-515a-95a5-4e8890be07e0.jpeg" alt="Yara Candy Gift Set" loading="lazy">
+                <div class="combo-body">
+                    <span class="combo-tier">🔥 A-TIER</span>
+                    <div class="combo-name">LATTAFA GIFT SET YARA CANDY 3 PCS</div>
+                    <div class="combo-products">
+                        <span class="combo-prod-tag">Yara Candy EDP</span>
+                        <span class="combo-prod-tag">Body Lotion</span>
+                        <span class="combo-prod-tag">Shower Gel</span>
+                    </div>
+                    <div class="combo-desc">El set completo de la reina viral Yara Candy. Incluye el EDP, loción y gel de baño para un aroma envolvente de pies a cabeza durante todo el día. La experiencia completa.</div>
+                    <div class="combo-verdict">💡 Perfecto como regalo. La fragancia más viral acompañada de sus complementos de lujo.</div>
+                    <div class="combo-footer">
+                        <span class="combo-price">$4,490</span>
+                        <span class="prod-tag tag-female">3 piezas</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMBO #3 -->
+            <div class="combo-card">
+                <div class="combo-rank-num">#3</div>
+                <img class="combo-img" src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Fb1925bdf-3143-5afb-94d0-1772e70d6093.png" alt="Asad 5th Anniversary Set" loading="lazy">
+                <div class="combo-body">
+                    <span class="combo-tier">⭐ A-TIER</span>
+                    <div class="combo-name">LATTAFA ASAD 5TH ANNIVERSARY 2 PC SET</div>
+                    <div class="combo-products">
+                        <span class="combo-prod-tag">Asad EDP 3.4oz</span>
+                        <span class="combo-prod-tag">Asad Zanzibar EDP 3.4oz</span>
+                    </div>
+                    <div class="combo-desc">Dos leones en un set. Asad clásico (oud, madera y dulce oriental) más Asad Zanzibar (frutal y especiado). Cubren el día y la noche con autoridad y elegancia árabe.</div>
+                    <div class="combo-verdict">💡 El set masculino árabe más completo. Dos beast modes que se complementan perfectamente.</div>
+                    <div class="combo-footer">
+                        <span class="combo-price">$3,990</span>
+                        <span class="prod-tag tag-male">2 perfumes</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMBO #4 -->
+            <div class="combo-card">
+                <div class="combo-rank-num">#4</div>
+                <img class="combo-img" src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F4134fc78-bc68-54be-bafe-cbdc09c3f327.png" alt="Good Girl" loading="lazy">
+                <div class="combo-body">
+                    <span class="combo-tier">💎 A-TIER</span>
+                    <div class="combo-name">CAROLINA HERRERA GOOD GIRL NEW YORK 2.7OZ EDP</div>
+                    <div class="combo-products">
+                        <span class="combo-prod-tag">Good Girl EDP 2.7oz</span>
+                        <span class="combo-prod-tag">Fragancia icónica</span>
+                    </div>
+                    <div class="combo-desc">El icónico tacón negro en su esencia: almendra tostada, café, jazmín y tonka. Una sola botella que es en sí misma un set completo de sensaciones — día a noche sin perder glamour. Complementado con la silueta del tacón que es arte en sí misma.</div>
+                    <div class="combo-verdict">💡 El perfume de diseñador más icónico del catálogo. Una inversión que se justifica sola.</div>
+                    <div class="combo-footer">
+                        <span class="combo-price">$7,795</span>
+                        <span class="prod-tag tag-female">Diseñador</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMBO #5 -->
+            <div class="combo-card">
+                <div class="combo-rank-num">#5</div>
+                <img class="combo-img" src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Fd23b1eba-4851-5f55-ad2c-713e43c14545.png" alt="Afnan 9PM" loading="lazy">
+                <div class="combo-body">
+                    <span class="combo-tier">✨ B-TIER</span>
+                    <div class="combo-name">AFNAN 9PM EDP 3.4OZ + AFNAN 9PM ELIXIR 3.4OZ</div>
+                    <div class="combo-products">
+                        <span class="combo-prod-tag">9PM EDP $2,890</span>
+                        <span class="combo-prod-tag">9PM Elixir $3,490</span>
+                    </div>
+                    <div class="combo-desc">El rey dulce de la noche en su versión clásica y su versión Elixir potenciada. 9PM para fiesta casual y 9PM Elixir para cuando quieres impactar más. La solución masculina 24/7 más económica del catálogo sin sacrificar calidad.</div>
+                    <div class="combo-verdict">💡 Mejor valor del catálogo masculino. Dos fragancias al nivel de diseñador por menos de uno de diseñador.</div>
+                    <div class="combo-footer">
+                        <span class="combo-price">$6,380</span>
+                        <span class="prod-tag tag-male">2 perfumes</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMBO #6 -->
+            <div class="combo-card">
+                <div class="combo-rank-num">#6</div>
+                <img class="combo-img" src="https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Fc0c22cb5-7414-5301-adb3-4df50b9c9aa7.png" alt="Khamrah Qahwa" loading="lazy">
+                <div class="combo-body">
+                    <span class="combo-tier">✨ B-TIER</span>
+                    <div class="combo-name">LATTAFA KHAMRAH + KHAMRAH QAHWA DÚO</div>
+                    <div class="combo-products">
+                        <span class="combo-prod-tag">Khamrah EDP $2,990</span>
+                        <span class="combo-prod-tag">Khamrah Qahwa $2,990</span>
+                    </div>
+                    <div class="combo-desc">La familia más adictiva de la panadería árabe. Khamrah original (oud, caramelo, especias) más Qahwa (café tostado, dátiles). En layering crean la experiencia gourmand oriental definitiva. Ambos beast mode y eternamente duraderos.</div>
+                    <div class="combo-verdict">💡 Para el amante de lo dulce oriental. El layering de estos dos es devastador en cumplidos.</div>
+                    <div class="combo-footer">
+                        <span class="combo-price">$5,980</span>
+                        <span class="prod-tag tag-unisex">Unisex</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- VERDICT FINAL -->
+    <div class="verdict reveal">
+        <h3>🎯 El Veredicto Final del Experto</h3>
+        <p>
+            Si tuvieras que elegir <strong style="color:white;">UN solo perfume</strong> del catálogo bajo los criterios de dulzor, duración, proyección y atracción —
+            el ganador es <strong style="color:var(--female-color);">Lattafa Eclaire ($3,490)</strong> para mujer y <strong style="color:var(--male-color);">JPG Le Male Elixir ($8,595)</strong> para hombre.
+            En categoría unisex (que inunde el lugar y enamore sin importar quién lo use),
+            <strong style="color:var(--combo-color);">Lattafa Khamrah Qahwa ($2,990)</strong> no tiene rival — y encima es el más accesible del podio.
+        </p>
+    </div>
+
+</div><!-- /page -->
+
+<script>
+    // Loader
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            document.getElementById('loader').classList.add('hidden');
+        }, 1100);
+    });
+
+    // Scroll top btn
+    const btn = document.getElementById('scrollTop');
+    window.addEventListener('scroll', function() {
+        btn.classList.toggle('visible', window.scrollY > 400);
+    });
+
+    // Reveal on scroll
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+            if (e.isIntersecting) e.target.classList.add('visible');
+        });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+
+    // Animate stat counters
+    function animateNum(el, target, dur) {
+        let s = 0, step = target / (dur / 16);
+        const t = setInterval(function() {
+            s += step;
+            if (s >= target) { el.textContent = target; clearInterval(t); }
+            else el.textContent = Math.floor(s);
+        }, 16);
+    }
+    const statsObs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+            if (e.isIntersecting) {
+                e.target.querySelectorAll('.stat-number').forEach(function(n) {
+                    const v = parseInt(n.textContent);
+                    n.textContent = '0';
+                    animateNum(n, v, 1400);
+                });
+                statsObs.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.3 });
+    const sg = document.querySelector('.stats-grid');
+    if (sg) statsObs.observe(sg);
+</script>
+</body>
+</html>
