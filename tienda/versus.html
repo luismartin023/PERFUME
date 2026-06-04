@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfume Fighter: El Mejor de 5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #FFD700; --hp-green: #39ff14; --hp-yellow: #ffff00; --hp-red: #ff0000; --p1-color: #00e5ff; --p2-color: #ff0055; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body { font-family: 'Press Start 2P', cursive; background-color: #000; color: #fff; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
+
+        #game-container { width: 1000px; height: 600px; position: relative; background: #222; overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.8); border: 4px solid var(--gold); }
+
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; background-size: cover; background-position: center; }
+        .screen.active { display: flex; }
+
+        /* ─── MENÚ PRINCIPAL ─── */
+        #screen-menu { background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2070'); }
+        .main-title { font-size: 3rem; color: var(--gold); text-shadow: 4px 4px 0px var(--p2-color); margin-bottom: 2rem; text-align: center; line-height: 1.4; }
+        .menu-btn { background: transparent; color: #fff; border: 4px solid #fff; padding: 15px 30px; font-family: 'Press Start 2P', cursive; font-size: 1.2rem; cursor: pointer; margin: 10px; transition: all 0.1s; }
+        .menu-btn:hover { background: #fff; color: #000; transform: scale(1.1); }
+        .menu-btn.small { padding: 10px 15px; font-size: 0.8rem; margin: 5px; }
+
+        /* MODALS */
+        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); border: 4px solid var(--gold); padding: 30px; text-align: center; display: none; z-index: 3000; font-family: 'Outfit', sans-serif; box-shadow: 0 0 30px rgba(0,0,0,0.9); min-width: 320px; }
+        .close-btn { position: absolute; top: 10px; right: 10px; background: red; color: white; border: 2px solid white; cursor: pointer; padding: 5px 10px; font-family: 'Press Start 2P', cursive; font-size: 0.6rem; }
+        .modal.show { display: block; }
+        .key { background: #fff; color: #000; padding: 3px 6px; border-radius: 4px; border-bottom: 2px solid #888; font-weight: bold;}
+
+        /* SELECCIÓN DE PERSONAJES */
+        #screen-select { background-color: #111; }
+        .roster-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 20px 0; background: rgba(255,255,255,0.05); padding: 15px; }
+        .roster-slot { width: 80px; height: 80px; border: 2px solid #555; background: #000; display: flex; justify-content: center; align-items: center; }
+        .roster-slot img { width: 80%; height: 80%; object-fit: contain; }
+        .roster-slot.p1-cursor { border-color: var(--p1-color); box-shadow: 0 0 10px var(--p1-color); }
+        .roster-slot.p2-cursor { border-color: var(--p2-color); box-shadow: 0 0 10px var(--p2-color); }
+
+        /* COMBATE */
+        #screen-fight { background-image: url('https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=2070'); }
+        .floor { position: absolute; bottom: 0; left: 0; width: 100%; height: 80px; background: rgba(0,0,0,0.5); border-top: 4px solid #fff; box-shadow: 0 -10px 20px rgba(0,0,0,0.8); }
+
+        .hud { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 100; }
+        .player-hud { width: 40%; }
+        .hud-name { font-size: 0.8rem; margin-bottom: 5px; text-shadow: 2px 2px 0px #000; display: flex; justify-content: space-between;}
+        .hp-container { width: 100%; height: 25px; border: 3px solid #fff; background: #333; margin-bottom: 5px; }
+        .hp-bar { height: 100%; background: var(--hp-green); transition: width 0.1s linear, background-color 0.2s; }
+        #p1-hp { float: right; transform-origin: right; }
+        #p2-hp { float: left; transform-origin: left; }
+        .round-dots { font-size: 1.2rem; text-shadow: 2px 2px 0px #000; }
+        .timer { font-size: 2.5rem; color: var(--gold); text-shadow: 3px 3px 0px #000; text-align: center; }
+        .round-info { text-align: center; font-size: 0.7rem; color: #fff; text-shadow: 1px 1px 0px #000; margin-top: 5px;}
+
+        .fighter-obj { position: absolute; background-size: contain; background-repeat: no-repeat; background-position: bottom center; transition: filter 0.1s; }
+        .fighter-obj img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); }
+
+        .fx-text { position: absolute; font-size: 2rem; color: #ff0; text-shadow: 2px 2px 0px #f00; pointer-events: none; z-index: 150; animation: floatUp 0.5s ease-out forwards; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-50px) scale(1.5); } }
+
+        .meme-text { position: absolute; font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.5rem; color: #fff; text-shadow: 2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000; pointer-events: none; z-index: 50; animation: drift 3s ease-out forwards; white-space: nowrap;}
+        @keyframes drift { 0% { opacity: 0; transform: translateY(0) scale(0.5); } 20% { opacity: 1; transform: translateY(-20px) scale(1.2); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-50px) scale(1); } }
+
+        .screen-flash { position: absolute; inset: 0; background: white; z-index: 200; opacity: 0; pointer-events: none; }
+        .announcer { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; color: var(--gold); text-shadow: 5px 5px 0px #f00; z-index: 300; display: none; text-align: center; line-height: 1.5; white-space: nowrap;}
+
+        /* WINNER */
+        #screen-winner { background: rgba(0,0,0,0.9); }
+        .winner-txt { font-size: 2.5rem; color: var(--gold); margin-bottom: 1rem; text-shadow: 4px 4px 0px #f00; text-align: center; line-height: 1.5;}
+        #winner-img { height: 250px; object-fit: contain; animation: float 2s infinite alternate; margin-bottom: 2rem;}
+        @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(-20px); } }
+
+        /* AUDIO SETTINGS */
+        .slider-container { display: flex; align-items: center; justify-content: space-between; margin: 15px 0; color: #fff; font-size: 0.9rem;}
+        .slider-container input { width: 60%; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- AUDIOS (Usando URLs más estables) -->
+        <audio id="bgm" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop preload="auto"></audio>
+        <!-- Reemplazamos la música con algo local simulado o que seguro funcione. Ion-sound button_tiny para menu -->
+        <audio id="sfx-menu" src="https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/button_tiny.mp3" preload="auto"></audio>
+        <audio id="sfx-punch" src="https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/tap.mp3" preload="auto"></audio>
+        <audio id="sfx-block" src="https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/snap.mp3" preload="auto"></audio>
+        <audio id="sfx-bell" src="https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/bell_ring.mp3" preload="auto"></audio>
+        <audio id="sfx-death" src="https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/glass.mp3" preload="auto"></audio>
+        <!-- Nota: He cambiado los audios a la librería de ion-sound porque es 100% segura contra bloqueos CORS en navegadores. -->
+
+        <!-- PANTALLA: MENÚ -->
+        <div id="screen-menu" class="screen active">
+            <div class="main-title">PERFUME<br>FIGHTER</div>
+            <button class="menu-btn" onclick="playMenuSfx(); goToSelect('1vCPU')">1 VS MÁQUINA</button>
+            <button class="menu-btn" onclick="playMenuSfx(); goToSelect('1v1')">1 VS 1</button>
+            <button class="menu-btn" onclick="playMenuSfx(); toggleModal('controls-guide')">CONTROLES</button>
+            <button class="menu-btn" onclick="playMenuSfx(); toggleModal('audio-settings')">PRUEBA DE SONIDO</button>
+            <a href="top_tier.html" style="text-decoration:none;"><button class="menu-btn" onclick="playMenuSfx()" style="border-color:#ff0055; color:#ff0055;">SALIR</button></a>
+        </div>
+
+        <!-- MODAL CONTROLES -->
+        <div class="modal" id="controls-guide">
+            <button class="close-btn" onclick="playMenuSfx(); toggleModal('controls-guide')">X</button>
+            <h3 style="color:var(--gold); margin-bottom:15px; font-family:'Press Start 2P', cursive; font-size: 1rem;">CONTROLES</h3>
+            <div style="text-align:left; font-size:0.8rem; line-height:1.5;">
+                <span style="color:var(--p1-color);">[PLAYER 1]</span><br>
+                Mover: <span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span class="key">D</span><br>
+                <span class="key">C</span> Bloqueo<br>
+                <span class="key">V</span> Ataque Rápido<br>
+                <span class="key">B</span> Ataque Pesado (Recarga 2s)<br><br>
+                <span style="color:var(--p2-color);">[PLAYER 2 / MÁQUINA]</span><br>
+                Mover: <span class="key">↑</span> <span class="key">←</span> <span class="key">↓</span> <span class="key">→</span><br>
+                <span class="key">J</span> Bloqueo<br>
+                <span class="key">K</span> Ataque Rápido<br>
+                <span class="key">L</span> Ataque Pesado (Recarga 2s)<br><br>
+                <span style="color:var(--gold);">Pausa:</span> <span class="key">P</span>
+            </div>
+        </div>
+
+        <!-- MODAL AUDIO -->
+        <div class="modal" id="audio-settings">
+            <button class="close-btn" onclick="playMenuSfx(); toggleModal('audio-settings')">X</button>
+            <h3 style="color:var(--gold); margin-bottom:15px; font-family:'Press Start 2P', cursive; font-size: 1rem;">SONIDO Y MÚSICA</h3>
+            
+            <div class="slider-container">
+                <label>Música:</label>
+                <input type="range" id="vol-bgm" min="0" max="1" step="0.1" value="0.5" onchange="updateVolume()">
+            </div>
+            <div class="slider-container" style="margin-top:10px;">
+                <label>Efectos:</label>
+                <input type="range" id="vol-sfx" min="0" max="1" step="0.1" value="0.8" onchange="updateVolume()">
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <button class="menu-btn small" onclick="testAudio('bgm')" style="border-color:var(--p1-color); color:var(--p1-color);">Probar Música</button>
+                <button class="menu-btn small" onclick="testAudio('punch')">Probar Golpe</button>
+                <button class="menu-btn small" onclick="testAudio('bell')" style="border-color:var(--gold); color:var(--gold);">Probar Campana</button>
+            </div>
+            <p style="font-size:0.6rem; color:#aaa; margin-top:15px;">Asegúrate de no tener tu Windows en Mute y de subir el volumen de tu navegador.</p>
+        </div>
+
+        <!-- PANTALLA: SELECCIÓN -->
+        <div id="screen-select" class="screen">
+            <h2 style="color:var(--gold); margin-bottom: 20px;" id="select-title">ROSTER OFICIAL</h2>
+            <div class="roster-grid" id="roster-grid"></div>
+            <p id="select-hint" style="font-family:'Outfit'; margin-top:20px; color:#ccc;">¡Dale a la ruleta para elegir personajes al azar!</p>
+            <div style="display:flex; margin-top: 10px;">
+                <button class="menu-btn" onclick="playMenuSfx(); goBackToMenu()">ATRÁS</button>
+                <button class="menu-btn" id="btn-spin" onclick="playMenuSfx(); startRoulette()" style="background:var(--p2-color); border-color:var(--p2-color);">GIRAR RULETA</button>
+                <button class="menu-btn" id="btn-fight-1v1" onclick="playMenuSfx(); initMatch()" style="display:none; background:var(--hp-green); border-color:var(--hp-green);">¡A PELEAR!</button>
+            </div>
+        </div>
+
+        <!-- PANTALLA: FIGHT -->
+        <div id="screen-fight" class="screen">
+            <div class="hud">
+                <div class="player-hud">
+                    <div class="hud-name">
+                        <span id="hud-name-p1" style="color:var(--p1-color);">P1</span>
+                        <span class="round-dots" id="p1-rounds"></span>
+                    </div>
+                    <div class="hp-container"><div class="hp-bar" id="p1-hp"></div></div>
+                    <div style="width:100%; height:5px; background:#333; margin-top:2px;"><div id="p1-cd" style="width:100%; height:100%; background:var(--hp-green); transition:width 0.1s;"></div></div>
+                </div>
+                <div>
+                    <div class="timer" id="timer-text">99</div>
+                    <div class="round-info" id="round-text">ROUND 1</div>
+                </div>
+                <div class="player-hud" style="text-align: right;">
+                    <div class="hud-name">
+                        <span class="round-dots" id="p2-rounds"></span>
+                        <span id="hud-name-p2" style="color:var(--p2-color);">LA MÁQUINA</span>
+                    </div>
+                    <div class="hp-container"><div class="hp-bar" id="p2-hp"></div></div>
+                    <div style="width:100%; height:5px; background:#333; margin-top:2px; transform: scaleX(-1);"><div id="p2-cd" style="width:100%; height:100%; background:var(--hp-green); transition:width 0.1s;"></div></div>
+                </div>
+            </div>
+
+            <div class="floor" id="floor"></div>
+
+            <div id="p1-obj" class="fighter-obj"><img id="p1-sprite" src=""></div>
+            <div id="p2-obj" class="fighter-obj"><img id="p2-sprite" src=""></div>
+
+            <div class="screen-flash" id="screen-flash"></div>
+            <div class="announcer" id="announcer">FIGHT!</div>
+        </div>
+
+        <!-- PANTALLA: WINNER FINAL -->
+        <div id="screen-winner" class="screen">
+            <div class="winner-txt" id="winner-txt">¡GANASTE TÚ, TIGUERE!</div>
+            <img id="winner-img" src="">
+            <div style="display:flex;">
+                <button class="menu-btn" onclick="playMenuSfx(); location.reload()">SALIR AL MENÚ</button>
+                <button class="menu-btn" onclick="playMenuSfx(); rematch()" style="border-color:var(--hp-green); color:var(--hp-green);">REVANCHA</button>
+            </div>
+        </div>
+
+        <!-- PANTALLA: PAUSA -->
+        <div id="screen-pause" class="screen" style="background: rgba(0,0,0,0.8); z-index: 2000;">
+            <div class="main-title" style="color:white; text-shadow:none;">PAUSADO</div>
+            <div style="display:flex;">
+                <button class="menu-btn" onclick="playMenuSfx(); togglePause()">CONTINUAR</button>
+                <button class="menu-btn" onclick="playMenuSfx(); toggleModal('controls-guide')" style="border-color:var(--gold); color:var(--gold);">CONTROLES</button>
+            </div>
+            <div style="display:flex;">
+                <button class="menu-btn" onclick="playMenuSfx(); toggleModal('audio-settings')" style="border-color:var(--p1-color); color:var(--p1-color);">SONIDO</button>
+                <button class="menu-btn" onclick="playMenuSfx(); location.reload()" style="border-color:#ff0055; color:#ff0055;">SALIR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ─── ROSTER AMPLIADO (18 Personajes, Imágenes Reparadas) ───
+        const roster = [
+            { id:0, name:"Eclaire", hp:150, atk:12, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Ff570a5f9-ede7-57b4-987a-c27f03ddacfa.png" },
+            { id:1, name:"Le Male Elixir", hp:140, atk:14, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F24403f2b-7ddd-5c44-b457-f06893e9ea61.png" },
+            { id:2, name:"Khamrah", hp:145, atk:11, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Ff9d80175-e8eb-5b2d-ada6-6287f590d0ae.png" },
+            { id:3, name:"Amber Oud", hp:135, atk:13, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F413596ec-ef54-5d73-962b-3ed6f4c8e9bb.png" },
+            { id:4, name:"Scandal Int.", hp:130, atk:15, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F4b1f2ceb-e302-5f7e-98b0-31acde1de79a.png" },
+            { id:5, name:"Most Wanted", hp:125, atk:12, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Fcbfb6e86-0f80-5d00-a0c4-5e45819f6719.png" },
+            { id:6, name:"Afnan 9PM", hp:120, atk:10, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Fd23b1eba-4851-5f55-ad2c-713e43c14545.png" },
+            { id:7, name:"Good Girl", hp:125, atk:11, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F4134fc78-bc68-54be-bafe-cbdc09c3f327.png" },
+            { id:8, name:"Lattafa Asad", hp:130, atk:12, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Fdcb1c411-a04e-5d27-a921-73b3ff9c1a21.png" },
+            { id:9, name:"1M Royal", hp:135, atk:13, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Fdec86231-1cbd-51e4-aa3f-86d1b03fae51.png" },
+            { id:10,name:"Lattafa Yara", hp:120, atk:10, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F637f4275-008d-5222-a072-07378299c618.png" },
+            { id:11,name:"Ariana Cloud", hp:125, atk:11, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F7f59649e-2b60-5ec8-9fb5-1d59223dcb88.png" },
+            { id:12,name:"9PM Elixir", hp:140, atk:14, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Fcb5d3087-85b4-557e-88fd-e071eaf8fcd6.png" },
+            { id:13,name:"Yara Candy", hp:120, atk:10, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F284525f7-e388-5fca-b7bb-7b161b237944.png" },
+            { id:14,name:"Asad Bourbon", hp:135, atk:13, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Ff9ac90d1-56fa-551a-801c-b514ae506e2d.png" },
+            { id:15,name:"Khamrah Qahwa", hp:145, atk:11, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2Fc0c22cb5-7414-5301-adb3-4df50b9c9aa7.png" },
+            { id:16,name:"Cloud Pink", hp:125, atk:12, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F6217fe15-bd20-56cc-8694-979e89eff699.png" },
+            { id:17,name:"Scandal Woman", hp:130, atk:10, img:"https://imgproxy.treinta.co/sig/size:3840:::/quality:75/plain/https%3A%2F%2Fcdn.treinta.co%2Fweb-app%2Finventory%2Ffd792082-b97f-5df4-b720-625db042ba31%2F3c1d4293-621d-5e76-a74a-da4aea72004c.png" }
+        ];
+
+        // ─── DOMINICAN MEMES ───
+        const memes = ["¡Diablo, qué galleta!", "Ese tiguere ta' mangueando", "¡Dale banda!", "Se le fue el internet al bot 🤡", "¡Qué humo!", "Ese perfume huele a romo", "¡Sóbate!", "¡Te fuiste a pique!", "Esa trompada dolió en el alma", "¡Tan' fajao' como en colmadón!", "El bot ta' chivo", "¡Recógete loco!"];
+
+        // ─── AUDIO SYSTEM ───
+        const audios = {
+            bgm: document.getElementById('bgm'),
+            punch: document.getElementById('sfx-punch'),
+            block: document.getElementById('sfx-block'),
+            menu: document.getElementById('sfx-menu'),
+            bell: document.getElementById('sfx-bell'),
+            death: document.getElementById('sfx-death')
+        };
+        
+        let bgmVol = 0.5;
+        let sfxVol = 0.8;
+        let audioUnlocked = false;
+
+        function updateVolume() {
+            bgmVol = parseFloat(document.getElementById('vol-bgm').value);
+            sfxVol = parseFloat(document.getElementById('vol-sfx').value);
+            if(audios.bgm) audios.bgm.volume = bgmVol;
+        }
+        updateVolume();
+
+        function unlockAudio() {
+            if(audioUnlocked) return;
+            audioUnlocked = true;
+            Object.values(audios).forEach(a => { if(a) { a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(()=>{}); } });
+        }
+
+        function playSfx(type) { 
+            unlockAudio();
+            if(type === 'bgm') {
+                if(bgmVol > 0 && audios.bgm) { audios.bgm.currentTime = 0; audios.bgm.play().catch(()=>{}); }
+                return;
+            }
+            if(sfxVol > 0 && audios[type]) { 
+                let a = audios[type].cloneNode(); 
+                a.volume = sfxVol; 
+                a.play().catch(e => console.warn("Audio bloquedo por navegador", e)); 
+            } 
+        }
+        function playMenuSfx() { playSfx('menu'); }
+
+        function testAudio(type) {
+            playSfx(type);
+        }
+
+        // ─── MODALS & MENU ───
+        function toggleModal(id) { document.getElementById(id).classList.toggle('show'); }
+        
+        let gameMode = '1vCPU';
+        let p1Selection = null;
+        let p2Selection = null;
+
+        function goToSelect(mode) {
+            if(mode) gameMode = mode;
+            unlockAudio();
+            document.getElementById('screen-menu').classList.remove('active');
+            document.getElementById('screen-select').classList.add('active');
+            const grid = document.getElementById('roster-grid'); grid.innerHTML = '';
+            
+            p1Selection = null; p2Selection = null;
+            document.getElementById('btn-spin').disabled = false;
+
+            if(gameMode === '1vCPU') {
+                document.getElementById('select-title').textContent = "1 VS MÁQUINA";
+                document.getElementById('select-hint').textContent = "¡Dale a la ruleta para elegir personajes al azar!";
+                document.getElementById('btn-spin').style.display = 'block';
+                document.getElementById('btn-fight-1v1').style.display = 'none';
+                roster.forEach(c => { grid.innerHTML += `<div class="roster-slot" id="slot-${c.id}"><img src="${c.img}"></div>`; });
+            } else {
+                document.getElementById('select-title').textContent = "1 VS 1 - SELECCIÓN";
+                document.getElementById('select-hint').textContent = "P1: Haz clic para seleccionar tu personaje.";
+                document.getElementById('btn-spin').style.display = 'none';
+                document.getElementById('btn-fight-1v1').style.display = 'none';
+                roster.forEach(c => { 
+                    const div = document.createElement('div');
+                    div.className = 'roster-slot'; div.id = 'slot-'+c.id;
+                    div.innerHTML = `<img src="${c.img}">`;
+                    div.onclick = () => selectCharacter(c.id);
+                    grid.appendChild(div);
+                });
+            }
+        }
+
+        function selectCharacter(id) {
+            if(!p1Selection) {
+                p1Selection = roster.find(c => c.id === id);
+                document.getElementById('slot-'+id).classList.add('p1-cursor');
+                document.getElementById('select-hint').textContent = "P2: Haz clic para seleccionar tu personaje.";
+                playMenuSfx();
+            } else if(!p2Selection) {
+                p2Selection = roster.find(c => c.id === id);
+                document.getElementById('slot-'+id).classList.add('p2-cursor');
+                document.getElementById('select-hint').textContent = "¡Listos para pelear!";
+                document.getElementById('btn-fight-1v1').style.display = 'block';
+                playMenuSfx();
+            }
+        }
+
+        function goBackToMenu() {
+            if(rouletteInt) clearInterval(rouletteInt);
+            if(rouletteTimeout) clearTimeout(rouletteTimeout);
+            document.getElementById('screen-select').classList.remove('active');
+            document.getElementById('screen-menu').classList.add('active');
+        }
+
+        let p1Data, p2Data, rouletteInt, rouletteTimeout;
+        function startRoulette() {
+            const btn = document.getElementById('btn-spin'); btn.disabled = true;
+            let ticks = 0; const slots = document.querySelectorAll('.roster-slot');
+            rouletteInt = setInterval(() => {
+                slots.forEach(s => s.classList.remove('p1-cursor', 'p2-cursor'));
+                const r1 = Math.floor(Math.random() * roster.length);
+                let r2 = Math.floor(Math.random() * roster.length);
+                while(r2 === r1) r2 = Math.floor(Math.random() * roster.length);
+                document.getElementById('slot-'+r1).classList.add('p1-cursor');
+                document.getElementById('slot-'+r2).classList.add('p2-cursor');
+                ticks++;
+                if(ticks > 25) {
+                    clearInterval(rouletteInt); p1Data = roster[r1]; p2Data = roster[r2];
+                    rouletteTimeout = setTimeout(initMatch, 1000);
+                }
+            }, 80);
+        }
+
+        // ─── MATCH ENGINE (TOURNAMENT) ───
+        let p1Wins = 0, p2Wins = 0, currentRound = 1;
+        const roundTimers = { 1: 110, 2: 150, 3: 200, 4: 210, 5: 210 };
+        
+        let gameLoopId, isFighting = false, isPaused = false, timeLeft, timerInt;
+        const keys = { w:false, a:false, s:false, d:false, c:false, v:false, b:false, arrowup:false, arrowdown:false, arrowleft:false, arrowright:false, j:false, k:false, l:false };
+        
+        window.addEventListener('keydown', e => { 
+            const k = e.key.toLowerCase(); 
+            if(keys.hasOwnProperty(k)) keys[k] = true; 
+            if(k === 'p' && document.getElementById('screen-fight').classList.contains('active') && isFighting) {
+                togglePause();
+            }
+        });
+        window.addEventListener('keyup', e => { const k = e.key.toLowerCase(); if(keys.hasOwnProperty(k)) keys[k] = false; });
+
+        function togglePause() {
+            isPaused = !isPaused;
+            if(isPaused) {
+                document.getElementById('screen-pause').style.display = 'flex';
+                if(bgmVol > 0) audios.bgm.pause();
+                clearInterval(timerInt);
+            } else {
+                document.getElementById('screen-pause').style.display = 'none';
+                if(bgmVol > 0) audios.bgm.play().catch(()=>{});
+                timerInt = setInterval(() => {
+                    timeLeft--; document.getElementById('timer-text').textContent = timeLeft;
+                    if(timeLeft <= 0) endRound(true);
+                }, 1000);
+            }
+        }
+
+        class Fighter {
+            constructor(data, isP1) {
+                this.data = data; this.isP1 = isP1;
+                this.width = 100; this.height = 180;
+                this.hp = data.hp; this.maxHp = data.hp;
+                this.speed = 5; this.jumpForce = 16;
+                this.el = document.getElementById(isP1 ? 'p1-obj' : 'p2-obj');
+                this.img = document.getElementById(isP1 ? 'p1-sprite' : 'p2-sprite');
+                this.img.src = data.img;
+                this.resetPosition();
+            }
+            resetPosition() {
+                this.x = this.isP1 ? 200 : 1000 - 200 - this.width;
+                this.y = 80; this.vx = 0; this.vy = 0;
+                this.state = 'idle'; this.isFacingRight = this.isP1;
+                this.hp = this.maxHp; this.heavyCooldown = 0; this.attackTimer = 0;
+                this.updateUI();
+            }
+            update() {
+                this.vy -= 0.8; this.y += this.vy;
+                if(this.y <= 80) { this.y = 80; this.vy = 0; if(this.state === 'jump') this.state = 'idle'; }
+                this.x += this.vx;
+                if(this.x < 0) this.x = 0; if(this.x > 1000 - this.width) this.x = 1000 - this.width;
+
+                if(this.heavyCooldown > 0) this.heavyCooldown--;
+                if(this.attackTimer > 0) { this.attackTimer--; if(this.attackTimer === 0) this.state = 'idle'; }
+
+                this.el.style.left = this.x + 'px'; this.el.style.bottom = this.y + 'px';
+                this.el.style.height = (this.state === 'crouch') ? (this.height * 0.6) + 'px' : this.height + 'px';
+                this.img.style.transform = this.isFacingRight ? 'scaleX(1)' : 'scaleX(-1)';
+
+                if(this.state === 'hit') this.img.style.filter = 'drop-shadow(0 0 20px red) sepia(1) hue-rotate(-50deg) saturate(5)';
+                else if(this.state === 'block') this.img.style.filter = 'drop-shadow(0 0 15px cyan) brightness(0.7)';
+                else this.img.style.filter = 'drop-shadow(0 10px 10px rgba(0,0,0,0.5))';
+
+                const cdBar = document.getElementById(this.isP1 ? 'p1-cd' : 'p2-cd');
+                if(this.heavyCooldown > 0) {
+                    cdBar.style.width = ((120 - this.heavyCooldown) / 120 * 100) + '%';
+                    cdBar.style.background = 'gray';
+                } else {
+                    cdBar.style.width = '100%';
+                    cdBar.style.background = 'var(--hp-green)';
+                }
+            }
+            attack(type) {
+                if(this.state === 'attack' || this.state === 'hit') return;
+                
+                this.state = 'attack';
+                if(type === 'light') {
+                    this.attackTimer = 15; 
+                    this.currentAttack = { dmg: 5 + Math.floor(this.data.atk/2), reach: 80, yOff: 100, active: 5, knock: 5 };
+                } else {
+                    if(this.heavyCooldown > 0) { this.state = 'idle'; return; }
+                    this.attackTimer = 35; this.heavyCooldown = 120;
+                    this.currentAttack = { dmg: 20 + Math.floor(this.data.atk/2), reach: 120, yOff: 60, active: 15, knock: 15 };
+                }
+                this.vx = this.isFacingRight ? 2 : -2;
+            }
+            takeDamage(dmg, knock) {
+                if(this.state === 'block') { dmg = Math.floor(dmg * 0.2); playSfx('block'); }
+                else {
+                    this.state = 'hit'; this.attackTimer = 0;
+                    setTimeout(() => { if(this.state === 'hit') this.state = 'idle'; }, 300);
+                    playSfx('punch'); spawnFx(this.x + this.width/2, this.y + 100, dmg + "!");
+                }
+                this.hp = Math.max(0, this.hp - dmg);
+                this.vx = this.isFacingRight ? -knock : knock;
+                this.updateUI();
+            }
+            updateUI() {
+                const bar = document.getElementById(this.isP1 ? 'p1-hp' : 'p2-hp');
+                const pct = (this.hp / this.maxHp) * 100;
+                bar.style.width = pct + '%';
+                bar.style.background = pct < 30 ? 'var(--hp-red)' : (pct < 60 ? 'var(--hp-yellow)' : 'var(--hp-green)');
+            }
+        }
+
+        function initMatch() {
+            if(gameMode === '1v1') { p1Data = p1Selection; p2Data = p2Selection; }
+            document.getElementById('screen-select').classList.remove('active');
+            document.getElementById('screen-fight').classList.add('active');
+            p1 = new Fighter(p1Data, true); p2 = new Fighter(p2Data, false);
+            document.getElementById('hud-name-p1').textContent = p1.data.name;
+            document.getElementById('hud-name-p2').textContent = gameMode === '1vCPU' ? "MÁQUINA" : p2.data.name;
+            if(bgmVol > 0) audios.bgm.play().catch(()=>{});
+            startRound();
+        }
+
+        function startRound() {
+            p1.resetPosition(); p2.resetPosition();
+            timeLeft = roundTimers[currentRound] || 210;
+            document.getElementById('timer-text').textContent = timeLeft;
+            document.getElementById('round-text').textContent = "ROUND " + currentRound;
+            updateRoundDots();
+
+            announce(`ROUND ${currentRound}`, () => {
+                playSfx('bell');
+                announce("¡A DARSE PIÑA!", () => {
+                    isFighting = true;
+                    timerInt = setInterval(() => {
+                        timeLeft--; document.getElementById('timer-text').textContent = timeLeft;
+                        if(timeLeft <= 0) endRound(true);
+                    }, 1000);
+                    gameLoop();
+                });
+            });
+        }
+
+        function updateRoundDots() {
+            document.getElementById('p1-rounds').textContent = '🔵'.repeat(p1Wins);
+            document.getElementById('p2-rounds').textContent = '🔴'.repeat(p2Wins);
+        }
+
+        function spawnFx(x, y, text) {
+            const el = document.createElement('div'); el.className = 'arcade-font fx-text';
+            el.textContent = text; el.style.left = x + 'px'; el.style.bottom = y + 'px';
+            document.getElementById('game-container').appendChild(el);
+            setTimeout(() => el.remove(), 500);
+        }
+
+        function spawnMeme() {
+            const el = document.createElement('div'); el.className = 'meme-text';
+            el.textContent = memes[Math.floor(Math.random() * memes.length)];
+            el.style.left = (Math.random() * 600 + 100) + 'px';
+            el.style.bottom = (Math.random() * 300 + 150) + 'px';
+            document.getElementById('game-container').appendChild(el);
+            setTimeout(() => el.remove(), 3000);
+        }
+
+        function gameLoop() {
+            if(!isFighting || isPaused) {
+                if(isFighting && isPaused) gameLoopId = requestAnimationFrame(gameLoop);
+                return;
+            }
+            updateP1Inputs(); 
+            if(gameMode === '1vCPU') updateAI(); else updateP2Inputs();
+            
+            if(p1.state !== 'walk' && p1.y === 80) p1.vx *= 0.8;
+            if(p2.state !== 'walk' && p2.y === 80) p2.vx *= 0.8;
+            if(Math.abs(p1.x - p2.x) < 50 && p1.y === p2.y) {
+                if(p1.x < p2.x) { p1.x -= 2; p2.x += 2; } else { p1.x += 2; p2.x -= 2; }
+            }
+
+            [p1, p2].forEach(atkF => {
+                if(atkF.state === 'attack' && atkF.attackTimer === atkF.currentAttack.active) {
+                    const defF = atkF === p1 ? p2 : p1;
+                    let hitX = atkF.isFacingRight ? atkF.x + atkF.width : atkF.x - atkF.currentAttack.reach;
+                    if(!(defF.x > hitX + atkF.currentAttack.reach || defF.x + defF.width < hitX || defF.y > atkF.y + atkF.currentAttack.yOff + 50 || defF.y + defF.height < atkF.y + atkF.currentAttack.yOff)) {
+                        defF.takeDamage(atkF.currentAttack.dmg, atkF.currentAttack.knock);
+                    }
+                }
+            });
+
+            if(p1.hp <= 0 || p2.hp <= 0) endRound(false);
+            
+            p1.update(); p2.update();
+            if(p1.x < p2.x) { p1.isFacingRight = true; p2.isFacingRight = false; } else { p1.isFacingRight = false; p2.isFacingRight = true; }
+
+            if(Math.random() < 0.005) spawnMeme();
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function updateP1Inputs() {
+            if(p1.state === 'hit' || p1.state === 'attack') return;
+            p1.vx = 0; p1.state = p1.y > 80 ? 'jump' : 'idle';
+            if(keys.s && p1.y === 80) p1.state = 'crouch';
+            else if(keys.c && p1.y === 80) p1.state = 'block';
+            else {
+                if(keys.a) { p1.vx = -p1.speed; p1.state = p1.y === 80 ? 'walk' : p1.state; }
+                if(keys.d) { p1.vx = p1.speed; p1.state = p1.y === 80 ? 'walk' : p1.state; }
+                if(keys.w && p1.y === 80) { p1.vy = p1.jumpForce; p1.state = 'jump'; }
+                if(keys.v) p1.attack('light'); else if(keys.b) p1.attack('heavy');
+            }
+        }
+
+        function updateP2Inputs() {
+            if(p2.state === 'hit' || p2.state === 'attack') return;
+            p2.vx = 0; p2.state = p2.y > 80 ? 'jump' : 'idle';
+            if(keys.arrowdown && p2.y === 80) p2.state = 'crouch';
+            else if(keys.j && p2.y === 80) p2.state = 'block';
+            else {
+                if(keys.arrowleft) { p2.vx = -p2.speed; p2.state = p2.y === 80 ? 'walk' : p2.state; }
+                if(keys.arrowright) { p2.vx = p2.speed; p2.state = p2.y === 80 ? 'walk' : p2.state; }
+                if(keys.arrowup && p2.y === 80) { p2.vy = p2.jumpForce; p2.state = 'jump'; }
+                if(keys.k) p2.attack('light'); else if(keys.l) p2.attack('heavy');
+            }
+        }
+
+        function updateAI() {
+            if(p2.state === 'hit' || p2.state === 'attack') return;
+            p2.vx = 0; p2.state = p2.y > 80 ? 'jump' : 'idle';
+            const dx = p1.x - p2.x; const dist = Math.abs(dx);
+            
+            if(p1.state === 'attack' && p1.attackTimer > p1.currentAttack.active && dist < 150) {
+                if(Math.random() < 0.85 && p2.y === 80) { p2.state = 'block'; return; }
+            }
+            if(p1.y > 130 && dist < 150 && Math.random() < 0.1) { p2.attack('light'); return; }
+
+            if(dist > 120) {
+                p2.vx = dx > 0 ? p2.speed : -p2.speed;
+                if(p2.y === 80) p2.state = 'walk';
+                if(Math.random() < 0.02 && p2.y === 80) { p2.vy = p2.jumpForce; p2.state = 'jump'; }
+            } else if(p2.y === 80) {
+                const rnd = Math.random();
+                if(rnd < 0.2) p2.vx = dx > 0 ? -p2.speed : p2.speed;
+                else if(rnd < 0.4) p2.state = 'block';
+                else if(rnd < 0.5) p2.state = 'crouch';
+                else if(rnd < 0.7) p2.attack('light');
+                else if(rnd < 0.85) p2.attack('heavy');
+            }
+        }
+
+        function endRound(timeOut) {
+            isFighting = false; clearInterval(timerInt);
+            let roundWinner;
+            if(timeOut) roundWinner = p1.hp >= p2.hp ? p1 : p2;
+            else { roundWinner = p1.hp > 0 ? p1 : p2; playSfx('death'); }
+
+            if(roundWinner.isP1) p1Wins++; else p2Wins++;
+            updateRoundDots();
+
+            document.getElementById('screen-flash').style.opacity = '1';
+            setTimeout(() => document.getElementById('screen-flash').style.opacity = '0', 300);
+
+            let msg = timeOut ? "¡SE ACABÓ EL RELAJO!" : "¡K.O.!";
+            announce(msg, () => {
+                if(p1Wins === 3 || p2Wins === 3) {
+                    playSfx('bell'); setTimeout(()=>playSfx('bell'), 400); setTimeout(()=>playSfx('bell'), 800);
+                    showMatchWinner(roundWinner);
+                } else {
+                    currentRound++;
+                    let winMsg = roundWinner.isP1 ? "GANASTE EL ROUND" : "PERDISTE EL ROUND";
+                    if(gameMode === '1v1') winMsg = roundWinner.isP1 ? "P1 GANÓ EL ROUND" : "P2 GANÓ EL ROUND";
+                    announce(winMsg, () => startRound());
+                }
+            });
+        }
+
+        function showMatchWinner(w) {
+            document.getElementById('screen-fight').classList.remove('active');
+            document.getElementById('screen-winner').classList.add('active');
+            
+            if(gameMode === '1v1') {
+                document.getElementById('winner-txt').innerHTML = w.isP1 ? "¡P1 ES EL FINAL!" : "¡P2 ES EL FINAL!";
+            } else {
+                if(w.isP1) {
+                    document.getElementById('winner-txt').innerHTML = "¡TÚ ERE' EL FINAL!<br>LE DISTE SU PELA";
+                } else {
+                    document.getElementById('winner-txt').innerHTML = "¡TE MANDARON A<br>FREÍR BATATA!";
+                }
+            }
+            document.getElementById('winner-img').src = w.data.img;
+        }
+
+        function rematch() {
+            p1Wins = 0; p2Wins = 0; currentRound = 1;
+            document.getElementById('screen-winner').classList.remove('active');
+            document.getElementById('screen-fight').classList.add('active');
+            startRound();
+        }
+
+        function announce(text, cb) {
+            const el = document.getElementById('announcer');
+            el.innerHTML = text; el.style.display = 'block'; el.style.transform = 'translate(-50%, -50%) scale(0.5)';
+            setTimeout(() => {
+                el.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                setTimeout(() => { el.style.display = 'none'; if(cb) cb(); }, 1200);
+            }, 50);
+        }
+    </script>
+</body>
+</html>
