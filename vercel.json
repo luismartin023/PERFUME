@@ -1,0 +1,15 @@
+{
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "devCommand": null,
+  "installCommand": null,
+  "framework": null,
+  "github": {
+    "enabled": false
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  }
+}
