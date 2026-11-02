@@ -1,6 +1,17 @@
-# AS Fragrance - Tienda Online y Juego
+<div align="center">
 
-Proyecto web de AS Fragrance que incluye una tienda de perfumes, rankings de top tier y un juego arcade de peleas.
+# AS Fragrance — Tienda Online y Juego
+
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+![Sin backend](https://img.shields.io/badge/Backend-No%20requerido-1E7A3C?style=flat-square)
+![Hecho en RD](https://img.shields.io/badge/Hecho%20en-Rep%C3%BAblica%20Dominicana%20%F0%9F%87%A9%F0%9F%87%B4-CE1126?style=flat-square)
+
+Proyecto web de **AS Fragrance**: tienda de perfumes, rankings *top tier*
+y **Perfume Fighter**, un juego arcade de peleas con 18 personajes.
+
+</div>
 
 ## 📁 Estructura del Proyecto
 
